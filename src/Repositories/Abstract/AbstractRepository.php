@@ -1,6 +1,8 @@
 <?php
 
-use src\Service\Database\Database;
+namespace src\Repositories\Abstract;
+
+use src\Service\Database;
 
 abstract class AbstractRepository
 {
@@ -14,8 +16,14 @@ abstract class AbstractRepository
     public function findAll(): array
     {
         $sql = "SELECT * FROM {$this->table}";
-        $resuls = $this->db->query($sql);
-        $items = $resuls->fetchAll();
+        $results = $this->db->query($sql);
+        $items = $results->fetchAll();
         return $items;
+    }
+
+    public function createDatabase(): void
+    {
+        $sql = "CREATE DATABASE players";
+        $this->db->query($sql);
     }
 }

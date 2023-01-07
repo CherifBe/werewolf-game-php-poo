@@ -1,6 +1,7 @@
 <?php
 
 namespace src\Controllers;
+use src\Repositories\PlayerRepository;
 use src\Models\Cupidon;
 use src\Models\Hunter;
 use src\Models\Villager;
@@ -15,7 +16,8 @@ final class AppController
     private static ?self $instance = null;
     private bool $gameIsOver = false;
     private bool $newKill = false;
-    private array $playersAlive;
+    private PlayerRepository $repository;
+    private array $playersAlive; // TODO: Changer nom de variable
     public static function getApp(): self
     {
         if( is_null( self::$instance ) ) {
@@ -62,6 +64,9 @@ final class AppController
 
     public function start(): void
     {
+        $this->repository = new PlayerRepository();
+        //$players = $this->repository->findAll();
+        $this->repository->createDatabase();
         $nameOfPlayers = ['Julie', 'Maxime', 'Jean', 'Louis', 'Henry', 'William', 'Sarah', 'Emma', 'Ludivine', 'Jeremy', 'Christophe', 'Joseph'];
         $nbOfPlayer = 10; // On pourra éventuellement changer cette valeur
         $tabOfTheDead = [];

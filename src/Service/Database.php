@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Service\Database;
+namespace src\Service;
 use PDO;
 
 class Database
@@ -17,7 +17,7 @@ class Database
     public static function getPDO(): PDO
     {
         if(self::$instance === null){
-            self::$instance = new PDO('mysql:host=database;dbname=lamp', 'lamp', 'lamp', self::PDO_OPTIONS);;
+            self::$instance = new PDO('mysql:host=localhost;dbname=database', 'lamp', 'lamp', self::PDO_OPTIONS);;
         }
         return self::$instance;
     }
