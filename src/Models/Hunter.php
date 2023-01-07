@@ -5,5 +5,5 @@ use src\Models\Abstract\AbstractCharacter;
 
 final class Hunter extends AbstractCharacter
 {
-
+    protected const NAME = 'Hunter';
 }

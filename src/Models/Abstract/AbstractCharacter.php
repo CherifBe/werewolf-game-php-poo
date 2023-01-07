@@ -4,10 +4,10 @@ namespace src\Models\Abstract;
 abstract class AbstractCharacter
 {
     public string $name;
-    protected ?AbstractCharacter $inRelationShipWith = null;
-    protected bool $inRelationShip = false;
+    public ?AbstractCharacter $inRelationShipWith = null;
+    public bool $inRelationShip = false;
     public bool $isMayor = false;
-    protected bool $isAlive = true;
+    public bool $isAlive = true;
     // protected string $role;
 
     public function __construct(?string $name = null)
@@ -32,13 +32,13 @@ abstract class AbstractCharacter
         $this->name = $name;
     }
 
-
-    public function accuse(int $possibilityOfVotes)
+    public function accuse(int $possibilityOfVotes, int $myPosition): int
     {
-        return rand(0, $possibilityOfVotes);
-    }
-    protected function isDead()
-    {
+        $myVote = rand(0, $possibilityOfVotes);
+        if($myVote != $myPosition){ //Car on ne vote jamais pour se tuer soi même
+            return $myVote;
+        }
+        return $this->accuse($possibilityOfVotes, $myPosition);
 
     }
 }
