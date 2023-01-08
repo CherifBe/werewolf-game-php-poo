@@ -13,17 +13,14 @@ abstract class AbstractRepository
     {
         $this->db = Database::getPDO();
     }
-    public function findAll(): array
+    public function findAll(?string $instruction = ""): array
     {
         $sql = "SELECT * FROM {$this->table}";
+        if($instruction){
+            $sql .= $instruction;
+        }
         $results = $this->db->query($sql);
         $items = $results->fetchAll();
         return $items;
-    }
-
-    public function createDatabase(): void
-    {
-        $sql = "CREATE DATABASE players";
-        $this->db->query($sql);
     }
 }

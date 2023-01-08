@@ -7,6 +7,7 @@ use src\Models\Hunter;
 use src\Models\Villager;
 use src\Models\Werewolf;
 use src\Models\Witch;
+use src\Service\Renderer;
 
 
 // TODO: TOUT METTRE DANS UNE VARIABLE HTML ET LANCER LE RENDER A LA FIN
@@ -64,9 +65,8 @@ final class AppController
 
     public function start(): void
     {
-        $this->repository = new PlayerRepository();
-        //$players = $this->repository->findAll();
-        $this->repository->createDatabase();
+        //$this->repository = new PlayerRepository();
+        //$players = $this->repository->findAll(' LIMIT 10'); // On limite le jeu à 10 joueurs
         $nameOfPlayers = ['Julie', 'Maxime', 'Jean', 'Louis', 'Henry', 'William', 'Sarah', 'Emma', 'Ludivine', 'Jeremy', 'Christophe', 'Joseph'];
         $nbOfPlayer = 10; // On pourra éventuellement changer cette valeur
         $tabOfTheDead = [];
@@ -74,32 +74,32 @@ final class AppController
         for ($i = 0; $i < $nbOfPlayer; $i++) {
             $this->playersAlive[] = new Villager($nameOfPlayers[rand(0, count($nameOfPlayers)-1)]);
         }
-        echo '<p>Les joueurs sont prêts... le Jeu peut commencer...</p>';
-        echo '<p>Le jour se lève</p>';
+        $html_result = '<p>Les joueurs sont prêts... le Jeu peut commencer...</p>';
+        $html_result .='<p>Le jour se lève</p>';
 
-        echo '<p>Les villageois votent pour leur maire...</p>';
+        $html_result .= '<p>Les villageois votent pour leur maire...</p>';
         $playersVote = $this->vote($this->playersAlive);
-        echo "<p>Les villageois: <strong>{$this->playersAlive[$playersVote]->name}</strong> nous semblent être le meilleur pour occuper ce poste</p>";
+        $html_result .= "<p>Les villageois: <strong>{$this->playersAlive[$playersVote]->name}</strong> nous semblent être le meilleur pour occuper ce poste</p>";
         $this->playersAlive[$playersVote]->isMayor = true;
 
-        echo '<p>Les villageois ont passés une super journée, la nuit tombe...</p>';
-        echo '<p>Une lueur apparait dans le ciel</p>';
+        $html_result .= '<p>Les villageois ont passés une super journée, la nuit tombe...</p>';
+        $html_result .= '<p>Une lueur apparait dans le ciel</p>';
 
         $cupidon = new Cupidon();
-        echo '<p>Cupidon apparait!</p>';
-        echo '<p>Il use de sa flèche...</p>';
+        $html_result .= '<p>Cupidon apparait!</p>';
+        $html_result .= '<p>Il use de sa flèche...</p>';
 
-        $cupidon->coupleSelection($this->playersAlive);
+        $html_result .= $cupidon->coupleSelection($this->playersAlive);
 
-        echo '<p>Une personne suspicieuse apparait, elle semble hostile...</p>';
+        $html_result .= '<p>Une personne suspicieuse apparait, elle semble hostile...</p>';
         $witch = new Witch();
 
-        echo '<p>Le chasseur vient de rentrer au village</p>';
+        $html_result .= '<p>Le chasseur vient de rentrer au village</p>';
         $hunter = new Hunter();
         $this->playersAlive[] = $hunter;
 
-        echo '<p>La nuit tombe...</p>';
-        echo '<p>Des cris se font entendre, que se passe t\'il ?</p>';
+        $html_result .= '<p>La nuit tombe...</p>';
+        $html_result .= '<p>Des cris se font entendre, que se passe t\'il ?</p>';
 
         $wereWolves = [];
         for ($i = 0; $i < 2; $i++) { // On invoque 2 loups garous, on peut éventuellement changer cette valeur
@@ -108,7 +108,7 @@ final class AppController
             $this->playersAlive[] = $wereWolf;
         }
 
-        echo '<p>Quelque chose de jamais vu se passe au village...</p>';
+        $html_result .= '<p>Quelque chose de jamais vu se passe au village...</p>';
         $wereWolvesVote = $this->wereWolvesVote($wereWolves);
         $playerIsDead = $this->playersAlive[$wereWolvesVote];
 
@@ -118,36 +118,28 @@ final class AppController
         // A faire une fois que tous les autres joueurs sont prêts
         while(!$this->gameIsOver){
 
-            if(count($this->playersAlive) <= 2){
-                $gameIsOver = $this->pleaseVerify();
-                if($gameIsOver){
-                    echo '<h2>Les loups garous ont gagnés!!!!</h2>';
-                    $this->gameIsOver = true;
-                    return;
-                }
-            }
-
-            echo '<h2>Un nouveau jour se lève</h2>';
+            $html_result .= '<h2>Un nouveau jour se lève</h2>';
 
             if($this->newKill){
                 $this->newKill = false;
-                echo '<p>La nuit dernière était terrible!</p>';
+                $html_result .= '<p>La nuit dernière était terrible!</p>';
 
-                echo '<p>La sorcière s\'approche du corps...</p>';
+                $html_result .= '<p>La sorcière s\'approche du corps...</p>';
                 $witchLuck = rand(0, 100);
                 if($witchLuck> 90){
                     $playerIsAliveAgain = $witch->revive($tabOfTheDead);
+                    $html_result .= $playerIsAliveAgain->name . ' est ressuscité !!';
                     unset($tabOfTheDead[array_search($playerIsAliveAgain, $tabOfTheDead, true)]);
                     $tabOfTheDead = array_merge($tabOfTheDead);
                     $this->playersAlive[] = $playerIsAliveAgain;
                 } else {
-                    echo 'La sorcière tente un sort, en vain...';
+                    $html_result .= 'La sorcière tente un sort, en vain...';
                 }
 
-                echo '<p>Les villageois cherchent le coupable... ils votent!</p>';
+                $html_result .= '<p>Les villageois cherchent le coupable... ils votent!</p>';
                 $villagerVotedFor = $this->vote($this->playersAlive);
                 $playerAccused = $this->playersAlive[$villagerVotedFor];
-                echo '<p>On va tuer '. $playerAccused->name . ' ce vaurien!</p>';
+                $html_result .= '<p>On va tuer '. $playerAccused->name . ' ce vaurien!</p>';
 
                 $tabOfTheDead += $witch->sendToTheCemetery($playerAccused, $this->playersAlive);
 
@@ -157,25 +149,35 @@ final class AppController
                 }
 
             } else {
-                echo '<p>Il ne s\'est rien passé la nuit dernière, les villageois pensent avoir trouvé le bon coupable</p>';
-                echo '<p>Les villageois passent une journée ordinaire</p>';
+                $html_result .= '<p>Il ne s\'est rien passé la nuit dernière, les villageois pensent avoir trouvé le bon coupable</p>';
+                $html_result .= '<p>Les villageois passent une journée ordinaire</p>';
             }
 
             if(count($wereWolves) <= 0){
-                echo '<h2>Les villageois ont gagnés!!!!</h2>';
+                $html_result .= '<h2>Les villageois ont gagnés!!!!</h2>';
                 $this->gameIsOver = true;
-                return;
             } else {
-                echo '<h2>La nuit tombe</h2>';
+                $html_result .= '<h2>La nuit tombe</h2>';
                 $wereWolfHungry = rand(1,2);
                 if($wereWolfHungry > 1){
                     $wereWolvesVote = $this->wereWolvesVote($wereWolves);
                     $playerIsDead = $this->playersAlive[$wereWolvesVote];
-                    echo "<p>{$playerIsDead->name} n'aura pas de chance ce soir...</p>";
+                    $html_result .= "<p>{$playerIsDead->name} n'aura pas de chance ce soir...</p>";
                     $tabOfTheDead += $wereWolves[0]->sendToTheCemetery($playerIsDead, $this->playersAlive);
                     $this->newKill = true;
                 }
             }
+
+            if(count($this->playersAlive) <= 2){
+                $gameIsOver = $this->pleaseVerify();
+                if($gameIsOver){
+                    $html_result .= '<h2>Les loups garous ont gagnés!!!!</h2>';
+                    $this->gameIsOver = true;
+                }
+            }
         }
+
+        Renderer::render(compact('html_result'));
+
     }
 }

@@ -12,7 +12,6 @@ final class Witch extends AbstractCharacter implements KillerInterface
     {
         $playerIsAliveAgain = end($tabOfTheDead);
         $playerIsAliveAgain->isAlive = true;
-        echo $playerIsAliveAgain->name . ' est ressuscité !!';
         return $playerIsAliveAgain;
     }
 
@@ -24,14 +23,14 @@ final class Witch extends AbstractCharacter implements KillerInterface
         $player->isAlive = false;
     }
 
-    public function sendToTheCemetery(AbstractCharacter $player, array $players): array
+    public function sendToTheCemetery(AbstractCharacter $player, array &$players): array
     {
         $this->killSomeone($player);
         unset($players[array_search($player, $players, true)]);
         $players = array_merge($players);
         $tabOfTheDead[] = $player;
         if($player->inRelationShip){
-            echo "<p>Et il ne mourra pas seul... ". strtoupper($player->inRelationShipWith->name) ." L'ACCOMPAGNERA</p>";
+            // echo "<p>Et il ne mourra pas seul... ". strtoupper($player->inRelationShipWith->name) ." L'ACCOMPAGNERA</p>";
             $player->inRelationShip = false;
             $tabOfTheDead[] = $player->inRelationShipWith;
 
