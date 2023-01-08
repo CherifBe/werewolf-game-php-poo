@@ -9,16 +9,13 @@ use src\Models\Werewolf;
 use src\Models\Witch;
 use src\Service\Renderer;
 
-
-// TODO: TOUT METTRE DANS UNE VARIABLE HTML ET LANCER LE RENDER A LA FIN
-
 final class AppController
 {
     private static ?self $instance = null;
     private bool $gameIsOver = false;
     private bool $newKill = false;
     private PlayerRepository $repository;
-    private array $playersAlive; // TODO: Changer nom de variable
+    private array $playersAlive;
     public static function getApp(): self
     {
         if( is_null( self::$instance ) ) {
@@ -68,13 +65,15 @@ final class AppController
         //$this->repository = new PlayerRepository();
         //$players = $this->repository->findAll(' LIMIT 10'); // On limite le jeu à 10 joueurs
         $nameOfPlayers = ['Julie', 'Maxime', 'Jean', 'Louis', 'Henry', 'William', 'Sarah', 'Emma', 'Ludivine', 'Jeremy', 'Christophe', 'Joseph'];
-        $nbOfPlayer = 10; // On pourra éventuellement changer cette valeur
+        $nbOfPlayer = 5; // On pourra éventuellement changer cette valeur
         $tabOfTheDead = [];
 
         for ($i = 0; $i < $nbOfPlayer; $i++) {
             $this->playersAlive[] = new Villager($nameOfPlayers[rand(0, count($nameOfPlayers)-1)]);
         }
-        $html_result = '<p>Les joueurs sont prêts... le Jeu peut commencer...</p>';
+
+        $html_result = '<div class="container"><div class="list-group"><div class="list-group-item">';
+        $html_result .= '<p><strong>Les joueurs sont prêts... le Jeu peut commencer...</strong></p>';
         $html_result .='<p>Le jour se lève</p>';
 
         $html_result .= '<p>Les villageois votent pour leur maire...</p>';
@@ -114,10 +113,10 @@ final class AppController
 
         $tabOfTheDead += $wereWolves[0]->sendToTheCemetery($playerIsDead, $this->playersAlive);
         $this->newKill = true;
-
+        $html_result .= '</div>';
         // A faire une fois que tous les autres joueurs sont prêts
         while(!$this->gameIsOver){
-
+            $html_result .= '<div class="list-group-item">';
             $html_result .= '<h2>Un nouveau jour se lève</h2>';
 
             if($this->newKill){
@@ -175,7 +174,9 @@ final class AppController
                     $this->gameIsOver = true;
                 }
             }
+            $html_result .= '</div>';
         }
+        $html_result .= '</div></div>';
 
         Renderer::render(compact('html_result'));
 
